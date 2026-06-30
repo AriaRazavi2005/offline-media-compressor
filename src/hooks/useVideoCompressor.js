@@ -50,6 +50,7 @@ export const useVideoCompressor = () => {
       quality = 28, // CRF (Constant Rate Factor): 0 (lossless) to 51 (worst), default 28
       preset = 'ultrafast', // ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
       resolution = 'original', // original, 1080p, 720p, 480p, 360p
+      mute = false,
     } = options;
 
     if (!isLoaded && !ffmpegRef.current) {
@@ -101,9 +102,13 @@ export const useVideoCompressor = () => {
       args.push('-preset', preset);
       args.push('-threads', '0');
 
-      // 3. Audio settings (copy audio to save time & CPU)
-      args.push('-acodec', 'aac');
-      args.push('-b:a', '128k');
+      // 3. Audio settings
+      if (mute) {
+        args.push('-an');
+      } else {
+        args.push('-acodec', 'aac');
+        args.push('-b:a', '128k');
+      }
 
       // 4. Output filename
       args.push(outputName);

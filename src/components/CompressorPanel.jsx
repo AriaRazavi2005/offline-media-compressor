@@ -32,6 +32,7 @@ export const CompressorPanel = ({
   const [videoQuality, setVideoQuality] = useState(28); // CRF 18-35
   const [videoResolution, setVideoResolution] = useState('original');
   const [videoPreset, setVideoPreset] = useState('ultrafast');
+  const [videoMute, setVideoMute] = useState(false);
 
   // Load original image/video dimensions
   useEffect(() => {
@@ -79,6 +80,7 @@ export const CompressorPanel = ({
         quality: videoQuality,
         resolution: videoResolution,
         preset: videoPreset,
+        mute: videoMute,
       });
     }
   };
@@ -121,6 +123,7 @@ export const CompressorPanel = ({
                 <div className="form-group">
                   <label>فرمت خروجی</label>
                   <select value={imageFormat} onChange={(e) => setImageFormat(e.target.value)}>
+                    <option value="image/avif">AVIF (بهترین فشرده‌سازی، مدرن)</option>
                     <option value="image/webp">WebP (بهترین کاهش حجم)</option>
                     <option value="image/jpeg">JPEG (استاندارد)</option>
                     <option value="image/png">PNG (بدون افت کیفیت/بدون فشرده‌سازی زیاد)</option>
@@ -141,6 +144,11 @@ export const CompressorPanel = ({
                     disabled={imageFormat === 'image/png'}
                   />
                   {imageFormat === 'image/png' && <span className="help-text">تنظیم کیفیت برای فرمت PNG غیرفعال است.</span>}
+                  {imageFormat !== 'image/png' && (
+                    <div className="estimate-badge" style={{marginTop:'0.5rem',padding:'0.4rem 0.8rem',background:'rgba(255,255,255,0.03)',borderRadius:'8px',border:'1px solid var(--border-color)',fontSize:'0.8rem',color:'var(--text-secondary)'}}>
+                      💡 حجم تخمینی: ~{Math.round(file.size * (imageQuality / 100) * (imageFormat === 'image/webp' ? 0.6 : imageFormat === 'image/avif' ? 0.4 : 0.8) / 1024)} کیلوبایت
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group dimensions-group">
@@ -206,6 +214,19 @@ export const CompressorPanel = ({
                     <option value="slow">کند (کیفیت بهتر، حجم کمتر، پردازش بسیار زیاد)</option>
                   </select>
                 </div>
+
+                <div className="form-group">
+                  <div className="mute-toggle-container" style={{display:'flex',alignItems:'center',gap:'0.75rem'}}>
+                    <div 
+                      className={`toggle-switch ${videoMute ? 'active' : ''}`}
+                      onClick={() => setVideoMute(!videoMute)}
+                      style={{position:'relative',width:'44px',height:'24px',background:videoMute?'linear-gradient(135deg,var(--accent-purple),var(--accent-cyan))':'var(--bg-tertiary)',border:'1px solid var(--border-color)',borderRadius:'12px',cursor:'pointer',transition:'all 0.3s'}}
+                    >
+                      <span style={{content:'',position:'absolute',top:'2px',left:videoMute?'22px':'2px',width:'18px',height:'18px',borderRadius:'50%',background:'white',transition:'all 0.3s',display:'block'}} />
+                    </div>
+                    <span style={{fontSize:'0.85rem',color:'var(--text-secondary)'}}>حذف صدا (کاهش بیشتر حجم)</span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -240,7 +261,7 @@ export const CompressorPanel = ({
         {/* Compression Result */}
         {result && (
           <div className="result-section grid gap-6">
-            <h3 className="section-title">فشرده‌سازی با موفقیت انجام شد!</h3>
+            <h3 className="section-title">✅ فشرده‌سازی با موفقیت انجام شد!</h3>
             
             {/* Comparison Stats */}
             <div className="stats-box grid">
